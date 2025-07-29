@@ -15,6 +15,18 @@ const (
 	frenchHelloPrefix  = "Bonjour, "
 )
 
+type OptionFunc func(*GreetingOpts)
+
+func WithLanguage(lang string) OptionFunc {
+	return func(opts *GreetingOpts) {
+		opts.language = lang
+	}
+}
+
+type GreetingOpts struct {
+	language string
+}
+
 func greetingPrefix(language string) (prefix string) {
 	switch language {
 	case spanish:
@@ -27,14 +39,22 @@ func greetingPrefix(language string) (prefix string) {
 	return
 }
 
-func Hello(name, language string) string {
+func Hello(name string, options ...OptionFunc) string {
 	if name == "" {
 		name = "World"
 	}
 
-	return greetingPrefix(language) + name
+	opts := &GreetingOpts{
+		language: "",
+	}
+
+	for _, opt := range options {
+		opt(opts)
+	}
+
+	return greetingPrefix(opts.language) + name
 }
 
 func main() {
-	fmt.Println(Hello("world", ""))
+	fmt.Println(Hello("world"))
 }
